@@ -189,7 +189,11 @@ define( function( require, exports, module ) {
         this.$widget.find( '.btn-remove' ).on( 'click', function() {
             if ( that.points.length < 2 ) {
                 that._updateInputs( [] );
-            } else if ( window.confirm( 'This will completely remove the current geopoint from the list of geopoints and cannot be undone. Are you sure you want to do this?' ) ) {
+            // } else if ( window.confirm( 'This will completely remove the current geopoint from the list of geopoints and cannot be undone. Are you sure you want to do this?' ) ) {
+            //     that._removePoint();
+            // }
+            /* Enleve l'alerte JS quand on supprime un point */
+            } else  {
                 that._removePoint();
             }
         } );
@@ -333,7 +337,7 @@ define( function( require, exports, module ) {
     Geopicker.prototype._addDomElements = function() {
         var map = '<div class="map-canvas-wrapper"><div class=map-canvas id="map' + this.mapId + '"></div></div>',
             points = '<div class="points"><button type="button" class="addpoint">+</button></div>',
-            kml = '<a href="#" class="toggle-input-type-btn"><span class="kml-input">KML</span><span class="points-input">points</span></a>' +
+            kml = //'<a href="#" class="toggle-input-type-btn"><span class="kml-input">KML</span><span class="points-input">points</span></a>' +
             '<label class="geo kml">KML coordinates' +
             '<progress class="paste-progress hide"></progress>' +
             '<textarea class="ignore" name="kml" placeholder="paste KML coordinates here"></textarea>' +
@@ -356,8 +360,11 @@ define( function( require, exports, module ) {
             '<div class="geo-inputs">' +
             '<label class="geo lat">latitude (x.y &deg;)<input class="ignore" name="lat" type="number" step="0.000001" min="-90" max="90"/></label>' +
             '<label class="geo long">longitude (x.y &deg;)<input class="ignore" name="long" type="number" step="0.000001" min="-180" max="180"/></label>' +
-            '<label class="geo alt">altitude (m)<input class="ignore" name="alt" type="number" step="0.1" /></label>' +
-            '<label class="geo acc">accuracy (m)<input class="ignore" name="acc" type="number" step="0.1" /></label>' +
+            /* Supprime les input altitude et accurancy 
+            ** Type="hidden" au lieu de number + suppression du label
+            */
+            '<label class="geo alt"><input class="ignore" name="alt" type="hidden" step="0.1"/></label>' +
+            '<label class="geo acc"><input class="ignore" name="acc" type="hidden" step="0.1"/></label>' +
             '<button type="button" class="btn-icon-only btn-remove"><span class="icon icon-trash"> </span></button>' +
             '</div>' +
             '</div>'
@@ -569,12 +576,22 @@ define( function( require, exports, module ) {
                     that._showIntersectError();
                 } else {
                     //that.points[that.currentIndex] = [ position.coords.latitude, position.coords.longitude ];
-                    //that._updateMap( );
-                    that._updateInputs( [ latLng.lat, latLng.lng, position.coords.altitude, position.coords.accuracy ] );
+                    
+                    /* Enleve le point de geolocalisation
+                    ** De base il faut juste commenter la ligen ci-dessous 
+                    ** + décommenter les suivantes
+                    *************************************
+                    ** rajout du param latLng sinon la geolocalisation ne fonctionnait plus
+                    ** dès qu'on faisait une recherche ou qu'on ajoutait un point
+                    */
+                    that._updateMap(latLng, defaultZoom);
+
+                    //that._updateInputs( [ latLng.lat, latLng.lng, position.coords.altitude, position.coords.accuracy ] );
+                    
                     // if current index is last of points, automatically create next point
-                    if ( that.currentIndex === that.points.length - 1 && that.props.type !== 'geopoint' ) {
-                        that._addPoint();
-                    }
+                    // if ( that.currentIndex === that.points.length - 1 && that.props.type !== 'geopoint' ) {
+                    //     that._addPoint();
+                    // }
                 }
             }, function() {
                 console.error( 'error occurred trying to obtain position' );
@@ -652,20 +669,39 @@ define( function( require, exports, module ) {
     Geopicker.prototype._updateMap = function( latLng, zoom ) {
         var that = this;
 
+        //console.error('update');
+        //console.error(this.map);
+
+
+
         // check if the widget is supposed to have a map
         if ( !this.props.map ) {
             return;
         }
 
+        //console.error('default : '+defaultZoom);
+        if(this.map){
+            var test = this.map.getZoom();
+
+            //console.error('getZoom : '+test);
+        }
+        //zoom = this.map.getZoom();
+        // if(this.lastZoom){
+        // zoom=this.lastZoom;}
+
         // determine zoom level
         if ( !zoom ) {
             if ( this.map ) {
                 // note: there are conditions where getZoom returns undefined!
+                //console.error("ici");
                 zoom = this.map.getZoom() || defaultZoom;
             } else {
+                //console.error("la");
                 zoom = defaultZoom;
             }
         }
+
+        //console.error('zoom : '+zoom);
 
         // update last requested map coordinates to be used to initialize map in mobile fullscreen view
         if ( latLng ) {
@@ -742,18 +778,20 @@ define( function( require, exports, module ) {
     };
 
     Geopicker.prototype._updateDynamicMapView = function( latLng, zoom ) {
-
         if ( !latLng ) {
             this._updatePolyline();
             this._updateMarkers();
             if ( this.points.length === 1 && this.points[ 0 ].toString() === '' ) {
                 if ( this.lastLatLng ) {
+                    //console.error('1');
                     this.map.setView( this.lastLatLng, this.lastZoom || defaultZoom );
                 } else {
+                    //console.error('2');
                     this.map.setView( L.latLng( 0, 0 ), zoom || defaultZoom );
                 }
             }
         } else {
+            //console.error('3');
             this.map.setView( latLng, zoom || defaultZoom );
         }
     };
@@ -954,13 +992,19 @@ define( function( require, exports, module ) {
 
         // console.log( 'markers to update', markers );
 
-        if ( markers.length > 0 ) {
+        if ( markers.length > 0) {
             this.markerLayer = L.layerGroup( markers ).addTo( this.map );
             // change the view to fit all the markers
             // don't use this for multiple markers, it messed up map clicks to place points
             if ( this.points.length === 1 || !this._isValidLatLngList( this.points ) ) {
                 // center the map, keep zoom level unchanged
-                this.map.setView( coords[ 0 ], this.lastZoom || defaultZoom );
+                //console.error('4');
+                /**
+                **  Copie de la ligne du dessus et mis en commentaire de l'original afin de traiter le premier point comme les autres
+                **  Et donc d'éviter le zoom quand on clique la premiere fois
+                **/
+                this.markerLayer = L.layerGroup( markers ).addTo( this.map );
+                //this.map.setView( coords[ 0 ], this.lastZoom || defaultZoom );
             }
         }
     };
@@ -1010,7 +1054,7 @@ define( function( require, exports, module ) {
 
         // possible bug in Leaflet, using timeout to work around
         setTimeout( function() {
-            that.map.fitBounds( that.polyline.getBounds() );
+            that.map.fitBounds( that.polyline.getBounds(), polylinePoints );
         }, 0 );
     };
 
@@ -1582,7 +1626,12 @@ define( function( require, exports, module ) {
             var _center = new google.maps.LatLng( center.lat, center.lng );
 
             this._google.setCenter( _center );
+            //console.error(this._map.getZoom());
+            //console.error('center : '+center);
+            //console.error('_center : '+_center);
+
             this._google.setZoom( Math.round( this._map.getZoom() ) );
+            //this._google.setZoom( Math.round( this._google.getZoom() ) );
 
             this._checkZoomLevels();
         },
@@ -1603,7 +1652,7 @@ define( function( require, exports, module ) {
             var _center = new google.maps.LatLng( center.lat, center.lng );
 
             this._google.setCenter( _center );
-            this._google.setZoom( Math.round( e.zoom ) );
+            //this._google.setZoom( Math.round( e.zoom ) );
         },
 
 
