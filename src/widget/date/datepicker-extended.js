@@ -101,10 +101,27 @@ define( function( require, exports, module ) {
      * @return {jQuery}        the jQuery-wrapped fake date input element
      */
     DatepickerExtended.prototype._createFakeDateInput = function( format ) {
+        var date = new Date();
+        var year = date.getFullYear();
+        var month = date.getMonth();
+        var day = date.getDate();
+        month++; // Car ca commence à 0 et non à 1
+        if(month<10)
+        {
+            month = '0'+month;
+        }
+        if(day<10)
+        {
+            day = '0'+day;
+        }
+        /**
+        **  Remplave dateI par year-month-day ...
+        **/
         var $dateI = $( this.element ),
+
             $fakeDate = $(
                 '<div class="widget date"><input class="ignore input-small" readonly="readonly" type="text" value="' +
-                $dateI.val() + '" placeholder="' + format + '" />' +
+                /*$dateI.val()*/  year+'-'+month+'-'+day+ '" placeholder="' + format + '" />' +
                 '<button class="btn-icon-only btn-reset" type="button"><i class="icon icon-refresh"> </i></button></div>' ),
             //$fakeDateReset = $fakeDate.find( '.btn-reset' ),
             $fakeDateI = $fakeDate.find( 'input' );
