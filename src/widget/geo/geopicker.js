@@ -1036,7 +1036,7 @@ define( function( require, exports, module ) {
 
         // possible bug in Leaflet, using timeout to work around
         setTimeout( function() {
-            that.map.fitBounds( that.polyline.getBounds(), polylinePoints );
+            that.map.fitBounds( that.polyline.getBounds(), polylinePoints, null );
         }, 0 );
     };
 
