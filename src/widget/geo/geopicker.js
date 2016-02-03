@@ -271,7 +271,13 @@ define( function( require, exports, module ) {
         // set map location on load
         if ( !loadedVal ) {
             // set worldview in case permissions take too long (e.g. in FF);
-            this._updateMap( [ 0, 0 ], 1 );
+            
+            /**
+            **  Zoom sur la belgique si pas de connexion ou chargement trop long
+            **  (Suppression de la ligne ci dessous et remplacer par les coordonnées belgique + zoom 7)
+            **/
+            //this._updateMap( [ 0, 0 ], 1 );
+            this._updateMap( [ 50.586724, 4.647217 ], 7 );
             if ( this.props.detect ) {
                 navigator.geolocation.getCurrentPosition( function( position ) {
                     that._updateMap( [ position.coords.latitude, position.coords.longitude ], defaultZoom );
@@ -982,10 +988,9 @@ define( function( require, exports, module ) {
             if ( this.points.length === 1 || !this._isValidLatLngList( this.points ) ) {
                 // center the map, keep zoom level unchanged
                 /**
-                **  Copie de la ligne du dessus et mis en commentaire de l'original afin de traiter le premier point comme les autres
+                **  Suppression de la ligne ci-dessous afin de traiter le premier point comme les autres
                 **  Et donc d'éviter le zoom quand on clique la premiere fois
                 **/
-                this.markerLayer = L.layerGroup( markers ).addTo( this.map );
                 //this.map.setView( coords[ 0 ], this.lastZoom || defaultZoom );
             }
         }
