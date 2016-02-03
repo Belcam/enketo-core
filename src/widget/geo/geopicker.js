@@ -362,9 +362,10 @@ define( function( require, exports, module ) {
             '<label class="geo long">longitude (x.y &deg;)<input class="ignore" name="long" type="number" step="0.000001" min="-180" max="180"/></label>' +
             /* Supprime les input altitude et accurancy 
             ** Type="hidden" au lieu de number + suppression du label
+            ** Ajout du display:none dans le label ( pas dans le css car regénéré ?)
             */
-            '<label class="geo alt"><input class="ignore" name="alt" type="hidden" step="0.1"/></label>' +
-            '<label class="geo acc"><input class="ignore" name="acc" type="hidden" step="0.1"/></label>' +
+            '<label class="geo alt" style="display:none;"><input class="ignore" name="alt" type="hidden" step="0.1"/></label>' +
+            '<label class="geo acc" style="display:none;"><input class="ignore" name="acc" type="hidden" step="0.1"/></label>' +
             '<button type="button" class="btn-icon-only btn-remove"><span class="icon icon-trash"> </span></button>' +
             '</div>' +
             '</div>'
@@ -669,39 +670,24 @@ define( function( require, exports, module ) {
     Geopicker.prototype._updateMap = function( latLng, zoom ) {
         var that = this;
 
-        //console.error('update');
-        //console.error(this.map);
-
-
-
         // check if the widget is supposed to have a map
         if ( !this.props.map ) {
             return;
         }
 
-        //console.error('default : '+defaultZoom);
         if(this.map){
             var test = this.map.getZoom();
-
-            //console.error('getZoom : '+test);
         }
-        //zoom = this.map.getZoom();
-        // if(this.lastZoom){
-        // zoom=this.lastZoom;}
 
         // determine zoom level
         if ( !zoom ) {
             if ( this.map ) {
                 // note: there are conditions where getZoom returns undefined!
-                //console.error("ici");
                 zoom = this.map.getZoom() || defaultZoom;
             } else {
-                //console.error("la");
                 zoom = defaultZoom;
             }
         }
-
-        //console.error('zoom : '+zoom);
 
         // update last requested map coordinates to be used to initialize map in mobile fullscreen view
         if ( latLng ) {
@@ -783,15 +769,12 @@ define( function( require, exports, module ) {
             this._updateMarkers();
             if ( this.points.length === 1 && this.points[ 0 ].toString() === '' ) {
                 if ( this.lastLatLng ) {
-                    //console.error('1');
                     this.map.setView( this.lastLatLng, this.lastZoom || defaultZoom );
                 } else {
-                    //console.error('2');
                     this.map.setView( L.latLng( 0, 0 ), zoom || defaultZoom );
                 }
             }
         } else {
-            //console.error('3');
             this.map.setView( latLng, zoom || defaultZoom );
         }
     };
@@ -998,7 +981,6 @@ define( function( require, exports, module ) {
             // don't use this for multiple markers, it messed up map clicks to place points
             if ( this.points.length === 1 || !this._isValidLatLngList( this.points ) ) {
                 // center the map, keep zoom level unchanged
-                //console.error('4');
                 /**
                 **  Copie de la ligne du dessus et mis en commentaire de l'original afin de traiter le premier point comme les autres
                 **  Et donc d'éviter le zoom quand on clique la premiere fois
@@ -1626,9 +1608,6 @@ define( function( require, exports, module ) {
             var _center = new google.maps.LatLng( center.lat, center.lng );
 
             this._google.setCenter( _center );
-            //console.error(this._map.getZoom());
-            //console.error('center : '+center);
-            //console.error('_center : '+_center);
 
             this._google.setZoom( Math.round( this._map.getZoom() ) );
             //this._google.setZoom( Math.round( this._google.getZoom() ) );

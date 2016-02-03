@@ -533,6 +533,7 @@ define( function( require, exports, module ) {
                 if ( $node.length !== 1 ) {
                     return ''; //console.error('getInputType(): no input node provided or multiple');
                 }
+
                 nodeName = $node.prop( 'nodeName' ).toLowerCase();
                 if ( nodeName === 'input' ) {
                     if ( $node.attr( 'type' ).length > 0 ) {
@@ -637,6 +638,7 @@ define( function( require, exports, module ) {
                     } );
                     return values;
                 }
+
                 return ( !$node.val() ) ? '' : ( $.isArray( $node.val() ) ) ? $node.val().join( ' ' ).trim() : $node.val().trim();
             },
             setVal: function( name, index, value ) {
@@ -721,8 +723,31 @@ define( function( require, exports, module ) {
                     that = this,
                     $formLanguages = $form.find( '#form-languages' ),
                     $langSelector = $( '.form-language-selector' ),
-                    defaultLang = $formLanguages.attr( 'data-default-lang' ) || $formLanguages.find( 'option' ).eq( 0 ).attr( 'value' ),
-                    defaultDirectionality = $formLanguages.find( '[value="' + defaultLang + '"]' ).attr( 'data-dir' ) || 'ltr';
+                    defaultLang = $formLanguages.attr( 'data-default-lang' ) || $formLanguages.find( 'option' ).eq( 0 ).attr( 'value' );
+
+                /**
+                **  Si la langue est default,
+                **  Prendre la langue en paramètre (lang=)
+                **  Si pas de param, garder la langue default
+                **  Si langue inconnue, garder default
+                **  Lang accepté : fr, nl, default
+                **/
+                if(defaultLang=='default')
+                {
+
+                    var param = 'lang';
+                    var lang_param = decodeURIComponent((new RegExp('[?|&]' + param + '=' + 
+                                    '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, 
+                                    '%20'))||null;
+
+                    if(lang_param != null && (lang_param=='default'||lang_param=='fr'||lang_param=='nl'))
+                    {
+                        defaultLang=lang_param;
+                        that.setAll(defaultLang);
+                    }
+                }
+
+                var defaultDirectionality = $formLanguages.find( '[value="' + defaultLang + '"]' ).attr( 'data-dir' ) || 'ltr';
 
                 $formLanguages
                     .detach()
@@ -1172,6 +1197,7 @@ define( function( require, exports, module ) {
                         $( '<span class="option-label active" lang="">' + labelRefValue + '</span>' );
 
                     value = $item.children( valueRef ).text();
+
                     $htmlItem.find( '[value]' ).attr( 'value', value );
 
                     if ( templateNodeName === 'label' ) {
@@ -1233,7 +1259,7 @@ define( function( require, exports, module ) {
                  */
                 $context = $output.closest( '.question, .note, .or-group' ).find( '[name]' ).eq( 0 );
                 context = ( $context.length ) ? that.input.getName( $context ) : undefined;
-
+                
                 insideRepeat = ( clonedRepeatsPresent && $output.parentsUntil( '.or', '.or-repeat' ).length > 0 );
                 insideRepeatClone = ( insideRepeat && $output.parentsUntil( '.or', '.or-repeat.clone' ).length > 0 );
                 index = ( insideRepeatClone ) ? that.input.getIndex( $context ) : 0;
