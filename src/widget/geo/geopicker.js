@@ -63,12 +63,13 @@ define( function( require, exports, module ) {
     function Geopicker( element, options ) {
         this.namespace = pluginName;
         // call the super class constructor
+        options.touch = false; // disabled as not working on mobiles ?
         Widget.call( this, element, options );
 
         this._init();
     }
 
-    // copy the prototype functions from the Widget super class
+// copy the prototype functions from the Widget super class
     Geopicker.prototype = Object.create( Widget.prototype );
 
     // ensure the constructor is the new one
@@ -276,7 +277,6 @@ define( function( require, exports, module ) {
             **  Zoom sur la belgique si pas de connexion ou chargement trop long
             **  (Suppression de la ligne ci dessous et remplacer par les coordonnées belgique + zoom 7)
             **/
-            //this._updateMap( [ 0, 0 ], 1 );
             this._updateMap( [ 50.586724, 4.647217 ], 7 );
             if ( this.props.detect ) {
                 navigator.geolocation.getCurrentPosition( function( position ) {
@@ -341,14 +341,14 @@ define( function( require, exports, module ) {
      * Adds the DOM elements
      */
     Geopicker.prototype._addDomElements = function() {
-        var map = '<div class="map-canvas-wrapper"><div class=map-canvas id="map' + this.mapId + '"></div></div>',
+        var map = '<div class="map-canvas-wrapper"><div class="map-canvas" id="map' + this.mapId + '"></div></div>',
             points = '<div class="points"><button type="button" class="addpoint">+</button></div>',
-            kml = //'<a href="#" class="toggle-input-type-btn"><span class="kml-input">KML</span><span class="points-input">points</span></a>' +
-            '<label class="geo kml">KML coordinates' +
+            kml = '<!-- a href="#" class="toggle-input-type-btn"><span class="kml-input">KML</span><span class="points-input">points</span></a -->' +
+            '<!-- label class="geo kml">KML coordinates' +
             '<progress class="paste-progress hide"></progress>' +
             '<textarea class="ignore" name="kml" placeholder="paste KML coordinates here"></textarea>' +
             '<span class="disabled-msg">remove all points to enable</span>' +
-            '</label>',
+            '</label -->',
             close = '<button type="button" class="close-chain-btn btn btn-default btn-xs">close polygon</button>',
             mapBtn = '<button type="button" class="show-map-btn btn btn-default">Map</button>';
 
@@ -582,7 +582,6 @@ define( function( require, exports, module ) {
                 if ( that.polyline && that.updatedPolylineWouldIntersect( latLng, that.currentIndex ) ) {
                     that._showIntersectError();
                 } else {
-                    //that.points[that.currentIndex] = [ position.coords.latitude, position.coords.longitude ];
                     
                     /* Enleve le point de geolocalisation
                     ** De base il faut juste commenter la ligen ci-dessous 
@@ -591,10 +590,12 @@ define( function( require, exports, module ) {
                     ** rajout du param latLng sinon la geolocalisation ne fonctionnait plus
                     ** dès qu'on faisait une recherche ou qu'on ajoutait un point
                     */
-                    that._updateMap(latLng, defaultZoom);
+                    that.points[that.currentIndex] = [ position.coords.latitude, position.coords.longitude ];
+                    that._updateMap();
+                    if( that.props.type !== 'geopoint' ) {
+                      that._addPoint();
+                    }
 
-                    //that._updateInputs( [ latLng.lat, latLng.lng, position.coords.altitude, position.coords.accuracy ] );
-                    
                     // if current index is last of points, automatically create next point
                     // if ( that.currentIndex === that.points.length - 1 && that.props.type !== 'geopoint' ) {
                     //     that._addPoint();
@@ -679,10 +680,6 @@ define( function( require, exports, module ) {
         // check if the widget is supposed to have a map
         if ( !this.props.map ) {
             return;
-        }
-
-        if(this.map){
-            var test = this.map.getZoom();
         }
 
         // determine zoom level
@@ -797,10 +794,11 @@ define( function( require, exports, module ) {
     Geopicker.prototype._getLayers = function() {
         var that = this,
             tasks = [];
-
-console.debug(maps);
+if(!console.log)
+  console.log = console.__proto__.log;
+console.log(maps);
         maps.forEach( function( map, index ) {
-console.debug(map, index, map.tiles === 'string', /^GOOGLE_(SATELLITE|ROADMAP|HYBRID|TERRAIN)/.test( map.tiles ), /^BING_(Aerial|AerialWithLabels|Birdseye|BirdseyeWithLabels|Road)/.test( map.tiles ));
+console.log(map, index, map.tiles === 'string', /^GOOGLE_(SATELLITE|ROADMAP|HYBRID|TERRAIN)/.test( map.tiles ), /^BING_(Aerial|AerialWithLabels|Birdseye|BirdseyeWithLabels|Road)/.test( map.tiles ));
             if ( typeof map.tiles === 'string') {
               if( /^GOOGLE_(SATELLITE|ROADMAP|HYBRID|TERRAIN)/.test( map.tiles ) ) {
                 tasks.push( that._getGoogleTileLayer( map, index ) );
@@ -1023,16 +1021,17 @@ console.log(options, key);
 
         if ( markers.length > 0) {
             this.markerLayer = L.layerGroup( markers ).addTo( this.map );
-            // change the view to fit all the markers
-            // don't use this for multiple markers, it messed up map clicks to place points
-            if ( this.points.length === 1 || !this._isValidLatLngList( this.points ) ) {
-                // center the map, keep zoom level unchanged
                 /**
                 **  Suppression de la ligne ci-dessous afin de traiter le premier point comme les autres
                 **  Et donc d'éviter le zoom quand on clique la premiere fois
                 **/
-                //this.map.setView( coords[ 0 ], this.lastZoom || defaultZoom );
-            }
+/*
+            // change the view to fit all the markers
+            // don't use this for multiple markers, it messed up map clicks to place points
+            if ( this.points.length === 1 || !this._isValidLatLngList( this.points ) ) {
+                // center the map, keep zoom level unchanged
+                this.map.setView( coords[ 0 ], this.lastZoom || defaultZoom );
+            }*/
         }
     };
 
@@ -1080,9 +1079,9 @@ console.log(options, key);
         }
 
         // possible bug in Leaflet, using timeout to work around
-        setTimeout( function() {
+        /*setTimeout( function() {
             that.map.fitBounds( that.polyline.getBounds(), polylinePoints, null );
-        }, 0 );
+        }, 0 );*/
     };
 
 
