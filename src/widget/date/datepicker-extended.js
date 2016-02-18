@@ -83,16 +83,20 @@ define( function( require, exports, module ) {
             todayHighlight: true,
             startView: settings.startView,
             minViewMode: settings.minViewMode
-        } ).on( 'changeDate', function() {
-            // copy changes made by datepicker to original input field
-            var value = $( this ).val();
-            if ( settings.startView === 'decade' && value.length === 4 ) {
-                value += '-01-01';
-            } else if ( settings.startView === 'year' && value.length < 8 ) {
-                value += '-01';
-            }
-            $( that.element ).val( value ).trigger( 'change' ).blur();
-        } );
+         } ).on('changeDate', function(){
+                //copy changes made by datepicker to original input field
+                var value = $( this ).val();
+                if ( settings.startView === 'decade' && value.length === 4 ) {
+                    value += '-01-01';
+                } else if ( settings.startView === 'year' && value.length < 8 ) {
+                    value += '-01';
+                }
+
+                $( that.element ).val( value ).trigger( 'change' ).blur();
+         });
+
+        //$fakeDateI.datepicker('setDate', '2016-02-02');
+        //($fakeDateI.datepicker()).trigger('changeDate');
     };
 
     /**
@@ -117,11 +121,13 @@ define( function( require, exports, module ) {
         /**
         **  Remplave dateI par year-month-day ...
         **/
-        var $dateI = $( this.element ),
 
+        var fullDate = year+'-'+month+'-'+day;
+
+        var $dateI = $( this.element ),
             $fakeDate = $(
                 '<div class="widget date"><input class="ignore input-small" readonly="readonly" type="text" value="' +
-                /*$dateI.val()*/  year+'-'+month+'-'+day+ '" placeholder="' + format + '" />' +
+                /*$dateI.val()*/ fullDate + '" placeholder="' + format + '" />' +
                 '<button class="btn-icon-only btn-reset" type="button"><i class="icon icon-refresh"> </i></button></div>' ),
             //$fakeDateReset = $fakeDate.find( '.btn-reset' ),
             $fakeDateI = $fakeDate.find( 'input' );
@@ -138,7 +144,7 @@ define( function( require, exports, module ) {
      * @param { jQuery } $fakeDateI Fake date input element
      */
     DatepickerExtended.prototype._setManualHandler = function( $fakeDateI ) {
-        //$fakeDateI.on( 'change', function( ) {
+        // $fakeDateI.on( 'change', function( ) {
         //  var date,
         //    value = $dateI.val( );
         //  if ( value.length > 0 ) {
@@ -149,7 +155,7 @@ define( function( require, exports, module ) {
         //    $dateI.val( value ).trigger( 'change' ).blur( );
         //  }
         //  return false;
-        //} );
+        // } );
     };
 
     /**
