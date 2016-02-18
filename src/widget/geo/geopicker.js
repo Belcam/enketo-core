@@ -576,33 +576,35 @@ define( function( require, exports, module ) {
         this.$detect.click( function( event ) {
             event.preventDefault();
             navigator.geolocation.getCurrentPosition( function( position ) {
-                var latLng = {
-                    lat: Math.round( position.coords.latitude * 1000000 ) / 1000000,
-                    lng: Math.round( position.coords.longitude * 1000000 ) / 1000000
-                };
-
-                if ( that.polyline && that.updatedPolylineWouldIntersect( latLng, that.currentIndex ) ) {
-                    that._showIntersectError();
-                } else {
-                    
-                    /* Enleve le point de geolocalisation
-                    ** De base il faut juste commenter la ligen ci-dessous 
-                    ** + décommenter les suivantes
-                    *************************************
-                    ** rajout du param latLng sinon la geolocalisation ne fonctionnait plus
-                    ** dès qu'on faisait une recherche ou qu'on ajoutait un point
-                    */
-                    that.points[that.currentIndex] = [ position.coords.latitude, position.coords.longitude ];
-                    that._updateMap();
-                    if( that.props.type !== 'geopoint' ) {
-                      that._addPoint();
-                    }
-
-                    // if current index is last of points, automatically create next point
-                    // if ( that.currentIndex === that.points.length - 1 && that.props.type !== 'geopoint' ) {
-                    //     that._addPoint();
-                    // }
-                }
+                that._updateMap( [ position.coords.latitude, position.coords.longitude ], defaultZoom );
+//                var latLng = {
+//                    lat: Math.round( position.coords.latitude * 1000000 ) / 1000000,
+//                    lng: Math.round( position.coords.longitude * 1000000 ) / 1000000
+//                };
+//
+//                if ( that.polyline && that.updatedPolylineWouldIntersect( latLng, that.currentIndex ) ) {
+//                    that._showIntersectError();
+//                } else {
+//                    
+//                    /* Enleve le point de geolocalisation
+//                    ** De base il faut juste commenter la ligen ci-dessous 
+//                    ** + décommenter les suivantes
+//                    *************************************
+//                    ** rajout du param latLng sinon la geolocalisation ne fonctionnait plus
+//                    ** dès qu'on faisait une recherche ou qu'on ajoutait un point
+//                    */
+//                    
+//                    /*that.points[that.currentIndex] = [ position.coords.latitude, position.coords.longitude ];
+//                    that._updateMap();
+//                    if( that.props.type !== 'geopoint' ) {
+//                      that._addPoint();
+//                    }*/
+//
+//                    // if current index is last of points, automatically create next point
+//                    // if ( that.currentIndex === that.points.length - 1 && that.props.type !== 'geopoint' ) {
+//                    //     that._addPoint();
+//                    // }
+//                }
             }, function() {
                 console.error( 'error occurred trying to obtain position' );
             }, options );
