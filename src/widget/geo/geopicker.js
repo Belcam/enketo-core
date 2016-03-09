@@ -350,7 +350,7 @@ define( function( require, exports, module ) {
             '<span class="disabled-msg">remove all points to enable</span>' +
             '</label -->',
             /* Style CSS close polygone pour l'avoir sur la carte */
-            close = '<button style="margin: -65px 10px 0px 0px; "type="button" class="close-chain-btn btn btn-default btn-xs">close polygon</button>',
+            close = '<button style="margin: -225px 10px 0px 0px; "type="button" class="close-chain-btn btn btn-default btn-xs">close polygon</button>',
             mapBtn = '<button type="button" class="show-map-btn btn btn-default">Map</button>';
 
         this.$widget = $(
@@ -369,8 +369,11 @@ define( function( require, exports, module ) {
             ** Type="hidden" au lieu de number + suppression du label
             ** Ajout du display:none dans le label ( pas dans le css car regénéré ?)
             */
-            '<label class="geo lat" style="display:none;"">latitude (x.y &deg;)<input class="ignore" name="lat" type="hidden" step="0.000001" min="-90" max="90"/></label>' +
-            '<label class="geo long" style="display:none;">longitude (x.y &deg;)<input class="ignore" name="long" type="hidden" step="0.000001" min="-180" max="180"/></label>' +
+            // '<label class="geo lat" style="display:none;"">latitude (x.y &deg;)<input class="ignore" name="lat" type="hidden" step="0.000001" min="-90" max="90"/></label>' +
+            // '<label class="geo long" style="display:none;">longitude (x.y &deg;)<input class="ignore" name="long" type="hidden" step="0.000001" min="-180" max="180"/></label>' +
+
+            '<label class="geo lat" >latitude (x.y &deg;)<input class="ignore" name="lat" type="number" step="0.000001" min="-90" max="90"/></label>' +
+            '<label class="geo long">longitude (x.y &deg;)<input class="ignore" name="long" type="number" step="0.000001" min="-180" max="180"/></label>' +
             
             '<label class="geo alt" style="display:none;"><input class="ignore" name="alt" type="hidden" step="0.1"/></label>' +
             '<label class="geo acc" style="display:none;"><input class="ignore" name="acc" type="hidden" step="0.1"/></label>' +
